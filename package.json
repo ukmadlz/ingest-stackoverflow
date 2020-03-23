@@ -1,0 +1,33 @@
+{
+  "name": "ingest-stackoverflow",
+  "version": "0.0.0",
+  "description": "Lambdas to ingest StackOverflow questions for me to review later",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ukmadlz/ingest-stackoverflow.git"
+  },
+  "keywords": [
+    "AWS",
+    "Lambda",
+    "Serverless",
+    "StackOverflow"
+  ],
+  "author": "Mike Elsmore <mike.elsmore@logz.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ukmadlz/ingest-stackoverflow/issues"
+  },
+  "homepage": "https://github.com/ukmadlz/ingest-stackoverflow#readme",
+  "dependencies": {
+    "aws-sdk": "^2.643.0",
+    "axios": "^0.19.2",
+    "rss-parser": "^3.7.6"
+  },
+  "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.39"
+  }
+}
