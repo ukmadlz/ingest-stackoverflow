@@ -26,7 +26,7 @@ provider:
 
 # you can overwrite defaults here
 #  stage: dev
-#  region: us-east-1
+#  region: eu-west-2
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -84,7 +84,7 @@ functions:
 
 plugins:
   - serverless-dynamodb-local
-
+  - serverless-offline
 custom:
   dynamodb:
   # If you only want to use DynamoDB Local in some stages, declare them here

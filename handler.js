@@ -22,16 +22,10 @@ const rssContent = async (feed) => {
   });
 }
 
-const DynamoDB = new AWS.DynamoDB.DocumentClient({
-  region: 'eu-west-2',
-  endpoint: 'http://localhost:8000',
-});
-
 // The SO Tag
 const tag = 'elk';
 
 module.exports.ingest = async event => {
-
   const questionsFeed = `https://stackoverflow.com/feeds/tag?tagnames=${tag}&sort=newest`;
   
   const questionsData = await rssContent(questionsFeed);
@@ -56,6 +50,14 @@ module.exports.ingest = async event => {
       answers: theAnswers
     }
   }));
+
+  const dynamoConfig = {
+    region: 'eu-west-2',
+  }
+  if(process.env.LOCAL) {
+    dynamoConfig.endpoint = 'http://localhost:8000';
+  }
+  const DynamoDB = new AWS.DynamoDB.DocumentClient(dynamoConfig);
 
   await Promise.all(completeResult.map(async (questionRecord) => {
     return DynamoDB.put({
