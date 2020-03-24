@@ -22,17 +22,15 @@ const rssContent = async (feed) => {
   });
 }
 
-const DynamoDB = new AWS.DynamoDB({
-  region: 'localhost',
+const DynamoDB = new AWS.DynamoDB.DocumentClient({
+  region: 'eu-west-2',
   endpoint: 'http://localhost:8000',
-  accessKeyId: 'DEFAULT_ACCESS_KEY',  // needed if you don't have aws credentials at all in env
-  secretAccessKey: 'DEFAULT_SECRET' // needed if you don't have aws credentials at all in env
 });
 
 // The SO Tag
 const tag = 'elk';
 
-module.exports.hello = async event => {
+module.exports.ingest = async event => {
 
   const questionsFeed = `https://stackoverflow.com/feeds/tag?tagnames=${tag}&sort=newest`;
   
@@ -59,11 +57,11 @@ module.exports.hello = async event => {
     }
   }));
 
-  Promise.all(completeResult.map(async (questionRecord) => {
-    return DynamoDB.putItem({
+  await Promise.all(completeResult.map(async (questionRecord) => {
+    return DynamoDB.put({
+      TableName: `StackOverflow${tag.toUpperCase()}`,
       Item: questionRecord,
-      TableName: `StackOverflow_${tag}`,
-    }).promise()
+    }).promise();
   }));
 
   return {
