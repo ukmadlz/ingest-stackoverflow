@@ -61,7 +61,7 @@ module.exports.ingest = async event => {
 
   await Promise.all(completeResult.map(async (questionRecord) => {
     return DynamoDB.put({
-      TableName: `StackOverflow${tag.toUpperCase()}`,
+      TableName: `StackOverflow${process.env.STAGE}`,
       Item: questionRecord,
     }).promise();
   }));

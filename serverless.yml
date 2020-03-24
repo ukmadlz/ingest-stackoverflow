@@ -23,10 +23,8 @@ service: ingest-stackoverflow
 provider:
   name: aws
   runtime: nodejs12.x
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: eu-west-2
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-2
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -65,10 +63,8 @@ functions:
 #    Check the event documentation for details
     events:
       - schedule: rate(1 minute)
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+    environment:
+      - STAGE: ${self:provider.stage}
 
 # you can add CloudFormation resource templates here
 #resources:
@@ -81,6 +77,22 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+resources:
+  Resources:
+    StackOverflow${self:provider.stage}:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "link"
+            AttributeType: "S"
+        KeySchema:
+          -
+            AttributeName: "link"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
 
 plugins:
   - serverless-dynamodb-local
