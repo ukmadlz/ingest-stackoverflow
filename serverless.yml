@@ -25,22 +25,25 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
 
 # you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 # you can define service wide environment variables here
 #  environment:
@@ -63,23 +66,11 @@ functions:
 #    Check the event documentation for details
     events:
       - schedule: rate(1 minute)
-    environment:
-      - STAGE: ${self:provider.stage}
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
 resources:
   Resources:
-    StackOverflow${self:provider.stage}:
+    StackOverflow:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
@@ -91,8 +82,13 @@ resources:
             AttributeName: "link"
             KeyType: "HASH"
         ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
 
 plugins:
   - serverless-dynamodb-local

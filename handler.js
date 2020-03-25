@@ -52,7 +52,7 @@ module.exports.ingest = async event => {
   }));
 
   const dynamoConfig = {
-    region: 'eu-west-2',
+    region: process.env.REGION,
   }
   if(process.env.LOCAL) {
     dynamoConfig.endpoint = 'http://localhost:8000';
@@ -61,7 +61,7 @@ module.exports.ingest = async event => {
 
   await Promise.all(completeResult.map(async (questionRecord) => {
     return DynamoDB.put({
-      TableName: `StackOverflow${process.env.STAGE}`,
+      TableName: process.env.DYNAMODB_TABLE,
       Item: questionRecord,
     }).promise();
   }));
