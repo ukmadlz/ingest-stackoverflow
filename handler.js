@@ -23,34 +23,10 @@ const rssContent = async (feed) => {
 }
 
 // The SO Tag
-const tag = 'elk';
+const tags = ['elk', 'elasticsearch', 'logstash', 'kibana', 'filebeat', 'metricbeat'];
 
 module.exports.ingest = async event => {
-  const questionsFeed = `https://stackoverflow.com/feeds/tag?tagnames=${tag}&sort=newest`;
-  
-  const questionsData = await rssContent(questionsFeed);
-
-  const completeResult = await Promise.all(questionsData.items.map(async (questionObject) => {
-    const { id } = questionObject;
-    const numericId = id.split('/').pop();
-    const questionFeed = `https://stackoverflow.com/feeds/question/${numericId}`;
-    const questionData = await rssContent(questionFeed);
-    const { title, summary, link, pubDate, author } = questionData.items.find((questionOrAnswer) => {
-      return !questionOrAnswer.title.startsWith('Answer by ');
-    });
-    const theAnswers = questionData.items.filter((questionOrAnswer) => {
-      return questionOrAnswer.title.startsWith('Answer by ');
-    });
-    return {
-      title,
-      summary,
-      link,
-      pubDate,
-      author,
-      answers: theAnswers
-    }
-  }));
-
+  // Configure and instantiate DynamoDB
   const dynamoConfig = {
     region: process.env.REGION,
   }
@@ -59,7 +35,49 @@ module.exports.ingest = async event => {
   }
   const DynamoDB = new AWS.DynamoDB.DocumentClient(dynamoConfig);
 
-  await Promise.all(completeResult.map(async (questionRecord) => {
+  // Loop through StackOverflow tags
+  const questionList = await Promise.all(tags.map(async (tag) => {
+    const questionsFeed = `https://stackoverflow.com/feeds/tag?tagnames=${tag}&sort=newest`;
+    try {
+      const questionsData = await rssContent(questionsFeed);
+      return await questionsData.items;
+    } catch(e) {
+      console.error(e);
+      return [];
+    }
+  }));
+
+  // Grab all the Q&A for the listed questions
+  const completeResult = await Promise.all(questionList.flat().map(async (questionObject) => {
+    const { id } = questionObject;
+    const numericId = id.split('/').pop();
+    const questionFeed = `https://stackoverflow.com/feeds/question/${numericId}`;
+    try {
+      const questionData = await rssContent(questionFeed);
+      const { title, summary, link, pubDate, author } = questionData.items.find((questionOrAnswer) => {
+        return !questionOrAnswer.title.startsWith('Answer by ');
+      });
+      const theAnswers = questionData.items.filter((questionOrAnswer) => {
+        return questionOrAnswer.title.startsWith('Answer by ');
+      });
+      return {
+        title,
+        summary,
+        link,
+        pubDate,
+        author,
+        answers: theAnswers
+      }
+    } catch(e) {
+      console.error(questionFeed);
+      console.error(e);
+      return false;
+    }
+  }));
+
+  await Promise.all(completeResult.filter((questionRecord) => {
+    return questionRecord;
+  }).map(async (questionRecord) => {
     return DynamoDB.put({
       TableName: process.env.DYNAMODB_TABLE,
       Item: questionRecord,
