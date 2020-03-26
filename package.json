@@ -25,6 +25,7 @@
   "dependencies": {
     "aws-sdk": "^2.643.0",
     "axios": "^0.19.2",
+    "logzio-nodejs": "^2.0.0",
     "rss-parser": "^3.7.6"
   },
   "devDependencies": {

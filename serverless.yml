@@ -25,10 +25,6 @@ provider:
   runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   region: eu-west-2
-  environment:
-    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
-    STAGE: ${self:provider.stage}
-    REGION: ${self:provider.region}
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
@@ -43,7 +39,7 @@ provider:
         - dynamodb:DeleteItem
       # Restrict our IAM role permissions to
       # the specific table for the stage
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.DYNAMODB_TABLE}"
 
 # you can define service wide environment variables here
 #  environment:
@@ -66,6 +62,19 @@ functions:
 #    Check the event documentation for details
     events:
       - schedule: rate(10 minutes)
+    environment:
+      DYNAMODB_TABLE: ${self:custom.DYNAMODB_TABLE}
+      STAGE: ${self:provider.stage}
+      REGION: ${self:provider.region}
+  sendToLogzIO:
+    handler: handler.logz
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [StackOverflow, StreamArn]
+    environment:
+      LOGZIO_TOKEN: ${env:LOGZIO_TOKEN}
 
 # you can add CloudFormation resource templates here
 resources:
@@ -84,7 +93,9 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:custom.DYNAMODB_TABLE}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"
@@ -94,6 +105,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
 custom:
+  DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
   dynamodb:
   # If you only want to use DynamoDB Local in some stages, declare them here
     stages:

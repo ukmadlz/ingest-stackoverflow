@@ -2,6 +2,7 @@
 
 const AWS = require('aws-sdk');
 const Parser = require('rss-parser');
+const Logger = require('logzio-nodejs');
 
 /**
  * Returns the value of the RSS Feed
@@ -25,6 +26,9 @@ const rssContent = async (feed) => {
 // The SO Tag
 const tags = ['elk', 'elasticsearch', 'logstash', 'kibana', 'filebeat', 'metricbeat'];
 
+/**
+ * Ingest information from StackOverflow tags
+ */
 module.exports.ingest = async event => {
   // Configure and instantiate DynamoDB
   const dynamoConfig = {
@@ -75,7 +79,7 @@ module.exports.ingest = async event => {
     }
   }));
 
-  await Promise.all(completeResult.filter((questionRecord) => {
+  return await Promise.all(completeResult.filter((questionRecord) => {
     return questionRecord;
   }).map(async (questionRecord) => {
     return DynamoDB.put({
@@ -83,9 +87,17 @@ module.exports.ingest = async event => {
       Item: questionRecord,
     }).promise();
   }));
-
-  return {
-    message: 'YUS!',
-    event
-  };
 };
+
+/**
+ * Send questions and answers to logz.io
+ */
+module.exports.logz = async (event) => {
+  const logger = Logger.createLogger({
+    token: process.env.LOGZIO_TOKEN,
+    type: 'lambda'
+  });
+  return await Promise.all(event.Records.map(async (record) => {
+    return logger.log(record);
+  }));
+}
