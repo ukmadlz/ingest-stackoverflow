@@ -98,6 +98,6 @@ module.exports.logz = async (event) => {
     type: 'lambda'
   });
   return await Promise.all(event.Records.map(async (record) => {
-    return logger.log(record);
+    return logger.log(AWS.DynamoDB.Converter.output({ M: record.dynamodb.NewImage }));
   }));
 }
