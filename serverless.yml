@@ -84,11 +84,11 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: "link"
+            AttributeName: "answerLink"
             AttributeType: "S"
         KeySchema:
           -
-            AttributeName: "link"
+            AttributeName: "answerLink"
             KeyType: "HASH"
         ProvisionedThroughput:
           ReadCapacityUnits: 1
