@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/ukmadlz/ingest-stackoverflow#readme",
   "dependencies": {
-    "aws-sdk": "^2.715.0",
+    "aws-sdk": "^2.721.0",
     "axios": "^0.19.2",
     "debug": "^4.1.1",
     "logzio-nodejs": "^2.0.1",
