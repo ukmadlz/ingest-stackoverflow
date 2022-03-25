@@ -4,7 +4,9 @@
   "description": "Lambdas to ingest StackOverflow questions for me to review later",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npm run snyk-protect",
+    "snyk-protect": "snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -27,11 +29,13 @@
     "axios": "^0.19.2",
     "debug": "^4.1.1",
     "logzio-nodejs": "^2.0.1",
-    "rss-parser": "^3.7.6"
+    "rss-parser": "^3.7.6",
+    "@snyk/protect": "latest"
   },
   "devDependencies": {
     "serverless": "^1.67.0",
     "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.1.2"
-  }
+  },
+  "snyk": true
 }
