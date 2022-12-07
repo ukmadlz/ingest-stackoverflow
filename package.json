@@ -30,7 +30,7 @@
     "rss-parser": "^3.7.6"
   },
   "devDependencies": {
-    "serverless": "^1.67.0",
+    "serverless": "^3.25.1",
     "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.1.2"
   }
