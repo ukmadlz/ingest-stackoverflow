@@ -24,9 +24,9 @@
   "homepage": "https://github.com/ukmadlz/ingest-stackoverflow#readme",
   "dependencies": {
     "aws-sdk": "^2.715.0",
-    "axios": "^0.19.2",
+    "axios": "^1.13.5",
     "debug": "^4.1.1",
-    "logzio-nodejs": "^2.0.1",
+    "logzio-nodejs": "^2.1.4",
     "rss-parser": "^3.7.6"
   },
   "devDependencies": {
